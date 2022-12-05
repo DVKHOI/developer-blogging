@@ -85,7 +85,7 @@ const Header = () => {
           <Container>
             <Navbar.Brand href="/">
               <img
-                srcSet="/coding.png "
+                srcSet="/coding.png"
                 alt=""
                 className="logo animate__animated animate__lightSpeedInLeft"
               />

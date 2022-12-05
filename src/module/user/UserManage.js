@@ -32,6 +32,7 @@ const UserManage = () => {
   const [lastDoc, setLastDoc] = useState("");
   const [total, setTotal] = useState(0);
   const { userInfo } = useAuth();
+  console.log("🚀 ~ file: UserManage.js:35 ~ UserManage ~ userInfo", userInfo);
   useEffect(() => {
     async function fetchData() {
       const colRef = collection(database, "users");
