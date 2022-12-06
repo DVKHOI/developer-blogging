@@ -40,7 +40,7 @@ const HomeFeature = () => {
   return (
     <HomeFeatureStyles className="home-block">
       <div className="container">
-        <Heading>Bài viết nổi bật</Heading>
+        <Heading>Featured post</Heading>
         {isLoading && (
           <div className="row">
             <div className="gap-3 mb-5 col-lg-3 col-md-6 col-sm-12 ">

@@ -81,7 +81,7 @@ const HomeNewest = () => {
   return (
     <HomeNewestStyles className="home-block">
       <div className="container">
-        <Heading>Mới nhất</Heading>
+        <Heading>List posts</Heading>
         {isLoading && (
           <div className="row">
             <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
