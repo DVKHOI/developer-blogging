@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import LoadingSkeleton from "../../components/loading/LoadingSkeleton";
 import PostCategory from "./PostCategory";
 import PostImage from "./PostImage";
 import PostMeta from "./PostMeta";
@@ -75,3 +76,15 @@ const PostNewestLarge = ({ data, className = "" }) => {
 };
 
 export default PostNewestLarge;
+export const NewwesItemSkeleton = () => {
+  return (
+    <div className="text-white rounded-lg select-none bg-slate-800">
+      <LoadingSkeleton
+        width="100%"
+        height="416px"
+        radius="8px"
+        className="mb-5"
+      ></LoadingSkeleton>
+    </div>
+  );
+};

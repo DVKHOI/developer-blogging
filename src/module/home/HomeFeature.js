@@ -2,7 +2,7 @@ import Heading from "../../components/layout/Heading";
 
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import PostFeatureItem, { MovieCartSkeleton } from "../post/PostFeatureItem";
+import PostFeatureItem, { FeatureItemSkeleton } from "../post/PostFeatureItem";
 import {
   collection,
   query,
@@ -44,16 +44,16 @@ const HomeFeature = () => {
         {isLoading && (
           <div className="row">
             <div className="gap-3 mb-5 col-lg-3 col-md-6 col-sm-12 ">
-              <MovieCartSkeleton></MovieCartSkeleton>
+              <FeatureItemSkeleton></FeatureItemSkeleton>
             </div>
             <div className="gap-3 mb-5 col-lg-3 col-md-6 col-sm-12 ">
-              <MovieCartSkeleton></MovieCartSkeleton>
+              <FeatureItemSkeleton></FeatureItemSkeleton>
             </div>
             <div className="gap-3 mb-5 col-lg-3 col-md-6 col-sm-12 ">
-              <MovieCartSkeleton></MovieCartSkeleton>
+              <FeatureItemSkeleton></FeatureItemSkeleton>
             </div>
             <div className="gap-3 mb-5 col-lg-3 col-md-6 col-sm-12 ">
-              <MovieCartSkeleton></MovieCartSkeleton>
+              <FeatureItemSkeleton></FeatureItemSkeleton>
             </div>
           </div>
         )}

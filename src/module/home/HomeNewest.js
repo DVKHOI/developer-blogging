@@ -14,7 +14,7 @@ import styled from "styled-components";
 import { Button } from "../../components/button";
 import Heading from "../../components/layout/Heading";
 import { database } from "../../firebase/firebase-config";
-import PostNewestLarge from "../post/PostNewestLarge";
+import PostNewestLarge, { NewwesItemSkeleton } from "../post/PostNewestLarge";
 
 const HomeNewestStyles = styled.div``;
 const POST_PER_PAGE = 6;
@@ -22,7 +22,7 @@ const HomeNewest = () => {
   const [posts, setPosts] = useState([]);
   const [lastDoc, setLastDoc] = useState();
   const [total, setTotal] = useState(0);
-  const isLoading = !posts;
+  const isLoading = posts.length <= 0;
   useEffect(() => {
     async function fetchData() {
       const colRef = collection(database, "posts");
@@ -82,7 +82,28 @@ const HomeNewest = () => {
     <HomeNewestStyles className="home-block">
       <div className="container">
         <Heading>Mới nhất</Heading>
-
+        {isLoading && (
+          <div className="row">
+            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
+              <NewwesItemSkeleton></NewwesItemSkeleton>
+            </div>
+            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
+              <NewwesItemSkeleton></NewwesItemSkeleton>
+            </div>
+            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
+              <NewwesItemSkeleton></NewwesItemSkeleton>
+            </div>
+            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
+              <NewwesItemSkeleton></NewwesItemSkeleton>
+            </div>
+            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
+              <NewwesItemSkeleton></NewwesItemSkeleton>
+            </div>
+            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
+              <NewwesItemSkeleton></NewwesItemSkeleton>
+            </div>
+          </div>
+        )}
         {!isLoading && (
           <div className="row">
             {posts.length > 0 &&

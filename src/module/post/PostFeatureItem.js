@@ -90,9 +90,9 @@ const PostFeatureItem = ({ data }) => {
 
 export default PostFeatureItem;
 
-export const MovieCartSkeleton = () => {
+export const FeatureItemSkeleton = () => {
   return (
-    <div className="text-white rounded-lg select-none  bg-slate-800">
+    <div className="text-white rounded-lg select-none bg-slate-800">
       <LoadingSkeleton
         width="100%"
         height="250px"
