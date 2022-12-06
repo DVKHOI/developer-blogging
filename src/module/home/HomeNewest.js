@@ -114,7 +114,7 @@ const HomeNewest = () => {
                 >
                   <PostNewestLarge
                     key={post.id}
-                    className=""
+                    className="h-full"
                     data={post}
                   ></PostNewestLarge>
                 </div>

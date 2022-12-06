@@ -2,31 +2,25 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDocs,
-  limit,
   onSnapshot,
   query,
-  startAfter,
   where,
 } from "firebase/firestore";
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { ActionDelete, ActionEdit, ActionView } from "../../components/action";
-import { Button } from "../../components/button";
 import { LabelStatus } from "../../components/label";
+import Paginations from "../../components/pagination/Pagination";
 import { Table } from "../../components/table";
 import { useAuth } from "../../context/auth-context";
 import { database } from "../../firebase/firebase-config";
 import { postStatus, userRole } from "../../utils/constants";
 
-const POST_PER_PAGE = 3;
 const PostManage = () => {
   const [listPosts, setListPost] = useState([]);
   const [filter, setFilter] = useState("");
-  const [lastDoc, setLastDoc] = useState();
-  const [total, setTotal] = useState(0);
   const navigate = useNavigate();
   useEffect(() => {
     async function fetchData() {
@@ -37,11 +31,8 @@ const PostManage = () => {
             where("title", ">=", filter),
             where("title", "<=", filter + "utf8")
           )
-        : query(colRef, limit(POST_PER_PAGE));
-      const documentSnapshots = await getDocs(newRef);
-      const lastVisible =
-        documentSnapshots.docs[documentSnapshots.docs.length - 1];
-      setLastDoc(lastVisible);
+        : colRef;
+
       onSnapshot(newRef, (snapshot) => {
         let result = [];
         snapshot.forEach((doc) => {
@@ -52,34 +43,11 @@ const PostManage = () => {
         });
         setListPost(result);
       });
-      onSnapshot(colRef, (snapshot) => {
-        setTotal(snapshot.size);
-      });
     }
     fetchData();
     document.title = "Post Manage";
   }, [filter]);
-  const handleLoadmorePost = async () => {
-    const nextRef = query(
-      collection(database, "posts"),
-      startAfter(lastDoc),
-      limit(POST_PER_PAGE)
-    );
-    onSnapshot(nextRef, (snapshot) => {
-      let result = [];
-      snapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setListPost([...listPosts, ...result]);
-    });
-    const documentSnapshots = await getDocs(nextRef);
-    const lastVisible =
-      documentSnapshots.docs[documentSnapshots.docs.length - 1];
-    setLastDoc(lastVisible);
-  };
+
   const renderStatus = (status) => {
     switch (status) {
       case postStatus.APPROVED:
@@ -110,6 +78,22 @@ const PostManage = () => {
       }
     });
   };
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  let NUM_OF_RECORDS = listPosts.length;
+  let LIMIT = 5;
+
+  const onPageChanged = useCallback(
+    (event, page) => {
+      event.preventDefault();
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
+  const currentData = listPosts.slice(
+    (currentPage - 1) * LIMIT,
+    (currentPage - 1) * LIMIT + LIMIT
+  );
   const { userInfo } = useAuth();
   return (
     <div>
@@ -127,7 +111,7 @@ const PostManage = () => {
       <Table>
         <thead>
           <tr>
-            <th>Id</th>
+            <th className="!font-semibold">Id</th>
             <th>Post</th>
             <th>Category</th>
             <th>Author</th>
@@ -136,8 +120,8 @@ const PostManage = () => {
           </tr>
         </thead>
         <tbody>
-          {listPosts.length > 0 &&
-            listPosts.map((post) => (
+          {currentData.length > 0 &&
+            currentData.map((post) => (
               <tr key={post.id}>
                 <td>{post.id?.slice(0, 5) + "..."}</td>
                 <td className="!pr-[50px]">
@@ -189,12 +173,14 @@ const PostManage = () => {
             ))}
         </tbody>
       </Table>
-      {/* <Pagination></Pagination> */}
-      {total > listPosts.length && (
-        <div className="mt-10">
-          <Button onClick={handleLoadmorePost} className="mx-auto">
-            Load more
-          </Button>
+      {listPosts.length > LIMIT && (
+        <div className="pagination-wrapper">
+          <Paginations
+            totalRecords={NUM_OF_RECORDS}
+            pageLimit={LIMIT}
+            onPageChanged={onPageChanged}
+            currentPage={currentPage}
+          />
         </div>
       )}
     </div>

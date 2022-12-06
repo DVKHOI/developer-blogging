@@ -2,14 +2,11 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDocs,
-  limit,
   onSnapshot,
   query,
-  startAfter,
   where,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import ActionDelete from "../../components/action/ActionDelete";
@@ -17,6 +14,7 @@ import ActionEdit from "../../components/action/ActionEdit";
 import ActionView from "../../components/action/ActionView";
 import Button from "../../components/button/Button";
 import LabelStatus from "../../components/label/LabelStatus";
+import Paginations from "../../components/pagination/Pagination";
 import Table from "../../components/table/Table";
 import { useAuth } from "../../context/auth-context";
 import { database } from "../../firebase/firebase-config";
@@ -24,15 +22,28 @@ import { userRole, userStatus } from "../../utils/constants";
 import Dashboard404 from "../dashboard/Dashboard404";
 import DashboardHeading from "../dashboard/DashboardHeading";
 
-const POST_PER_PAGE = 3;
 const UserManage = () => {
   const [filter, setFilter] = useState("");
   const navigate = useNavigate();
   const [listUsers, setListUsers] = useState([]);
-  const [lastDoc, setLastDoc] = useState("");
-  const [total, setTotal] = useState(0);
   const { userInfo } = useAuth();
-  console.log("🚀 ~ file: UserManage.js:35 ~ UserManage ~ userInfo", userInfo);
+
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  let NUM_OF_RECORDS = listUsers.length;
+  let LIMIT = 3;
+
+  const onPageChanged = useCallback(
+    (event, page) => {
+      event.preventDefault();
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
+  const currentData = listUsers.slice(
+    (currentPage - 1) * LIMIT,
+    (currentPage - 1) * LIMIT + LIMIT
+  );
   useEffect(() => {
     async function fetchData() {
       const colRef = collection(database, "users");
@@ -42,11 +53,8 @@ const UserManage = () => {
             where("fullname", ">=", filter),
             where("fullname", "<=", filter + "utf8")
           )
-        : query(colRef, limit(POST_PER_PAGE));
-      const documentSnapshots = await getDocs(newRef);
-      const lastVisible =
-        documentSnapshots.docs[documentSnapshots.docs.length - 1];
-      setLastDoc(lastVisible);
+        : colRef;
+
       onSnapshot(newRef, (snapshot) => {
         let results = [];
         snapshot.forEach((doc) => {
@@ -56,9 +64,6 @@ const UserManage = () => {
           });
         });
         setListUsers(results);
-      });
-      onSnapshot(colRef, (snapshot) => {
-        setTotal(snapshot.size);
       });
     }
     fetchData();
@@ -82,27 +87,7 @@ const UserManage = () => {
       }
     });
   };
-  const handleLoadMoreCategory = async () => {
-    const nextRef = query(
-      collection(database, "users"),
-      startAfter(lastDoc),
-      limit(POST_PER_PAGE)
-    );
-    onSnapshot(nextRef, (snapshot) => {
-      let result = [];
-      snapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setListUsers([...listUsers, ...result]);
-    });
-    const documentSnapshots = await getDocs(nextRef);
-    const lastVisible =
-      documentSnapshots.docs[documentSnapshots.docs.length - 1];
-    setLastDoc(lastVisible);
-  };
+
   const getRole = (role) => {
     switch (role) {
       case userRole.ADMIN:
@@ -161,7 +146,7 @@ const UserManage = () => {
           </tr>
         </thead>
         <tbody>
-          {listUsers?.map((user) => (
+          {currentData?.map((user) => (
             <tr key={user.id}>
               <td>{user.id.slice(0, 5) + "..."}</td>
               <td>
@@ -205,11 +190,14 @@ const UserManage = () => {
           ))}
         </tbody>
       </Table>
-      {total > listUsers.length && (
-        <div className="mt-10">
-          <Button onClick={handleLoadMoreCategory} className="mx-auto">
-            Load more
-          </Button>
+      {listUsers.length > LIMIT && (
+        <div className="pagination-wrapper">
+          <Paginations
+            totalRecords={NUM_OF_RECORDS}
+            pageLimit={LIMIT}
+            onPageChanged={onPageChanged}
+            currentPage={currentPage}
+          />
         </div>
       )}
     </div>

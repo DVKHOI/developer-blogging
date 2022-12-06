@@ -130,12 +130,9 @@ const PostUpdate = () => {
   useEffect(() => {
     document.title = "Sneaker Blogging - Update post ";
   }, []);
+
   const handleUpdatePost = async (values) => {
     if (!isValid) return null;
-    // if (userInfo?.role !== userRole.ADMIN || userInfo?.role !== userRole.MOD) {
-    //   Swal.fire("Failed", "You have no right to do this action", "warning");
-    //   return;
-    // }
     const cloneValues = { ...values };
     cloneValues.status = Number(values.status);
     cloneValues.slug = slugify(values.slug || values.title, { lower: true });
@@ -167,6 +164,7 @@ const PostUpdate = () => {
     setSelectCategory({});
     navigate("/manage/post");
   };
+  // add field modules (update content with upload image)
   const modules = useMemo(
     () => ({
       toolbar: [
@@ -271,16 +269,17 @@ const PostUpdate = () => {
             />
           </div>
         </div>
-        <div className="form-layout">
-          <Field>
-            <Label>Feature Hot</Label>
-            <Toggle
-              on={watchHot === true}
-              onClick={() => setValue("hot", !watchHot)}
-            ></Toggle>
-          </Field>
-          {(userInfo?.role === userRole.ADMIN ||
-            userInfo?.role === userRole.MOD) && (
+        {(userInfo?.role === userRole.ADMIN ||
+          userInfo?.role === userRole.MOD) && (
+          <div className="form-layout">
+            <Field>
+              <Label>Feature Hot</Label>
+              <Toggle
+                on={watchHot === true}
+                onClick={() => setValue("hot", !watchHot)}
+              ></Toggle>
+            </Field>
+
             <Field>
               <Label>Status</Label>
               <div className="flex items-center gap-x-5">
@@ -310,9 +309,8 @@ const PostUpdate = () => {
                 </Radio>
               </div>
             </Field>
-          )}
-        </div>
-
+          </div>
+        )}
         <Button
           type="submit"
           className="mx-auto w-[250px]"

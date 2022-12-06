@@ -31,7 +31,7 @@ const PostWithCategory = ({ params = "" }) => {
     <>
       {postCategory.length > 0 &&
         postCategory.map((post) => (
-          <div key={post.id} className="col-xl-4 col-lg-6 col-sm-12">
+          <div key={post.id} className="mb-4 col-xl-4 col-lg-6 col-sm-12">
             <PostNewestLarge data={post}></PostNewestLarge>
           </div>
         ))}

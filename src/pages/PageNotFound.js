@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-
+import logo from "../image/coding.png";
 const PageNotFoundStyles = styled.div`
   height: 100vh;
   display: flex;
@@ -31,7 +31,7 @@ const PageNotFound = () => {
   return (
     <PageNotFoundStyles>
       <NavLink to="/">
-        <img srcSet="/logo.png " alt="Developerway-blogging" className="logo" />
+        <img srcSet={logo} alt="Developerway-blogging" className="logo" />
       </NavLink>
       <h1 className="heading">Oops! Page bot found</h1>
       <NavLink to="/" className="back">

@@ -5,16 +5,12 @@ import {
   onSnapshot,
   query,
   where,
-  startAfter,
-  limit,
-  getDocs,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import ActionDelete from "../../components/action/ActionDelete";
 import ActionEdit from "../../components/action/ActionEdit";
-import ActionView from "../../components/action/ActionView";
 import Button from "../../components/button/Button";
 import LabelStatus from "../../components/label/LabelStatus";
 import Table from "../../components/table/Table";
@@ -24,17 +20,30 @@ import DashboardHeading from "../dashboard/DashboardHeading";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/auth-context";
 import Dashboard404 from "../dashboard/Dashboard404";
+import Paginations from "../../components/pagination/Pagination";
 
 const ManageCategoryStyles = styled.div``;
-const POST_PER_PAGE = 3;
 const CategoryManage = () => {
   const [categories, setCategories] = useState([]);
   const [filter, setFilter] = useState("");
-  const [lastDoc, setLastDoc] = useState("");
-  const [total, setTotal] = useState(0);
   const navigate = useNavigate();
   const { userInfo } = useAuth();
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  let NUM_OF_RECORDS = categories.length;
+  let LIMIT = 3;
 
+  const onPageChanged = useCallback(
+    (event, page) => {
+      event.preventDefault();
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
+  const currentData = categories.slice(
+    (currentPage - 1) * LIMIT,
+    (currentPage - 1) * LIMIT + LIMIT
+  );
   useEffect(() => {
     async function fetchData() {
       const colRef = collection(database, "categories");
@@ -44,11 +53,7 @@ const CategoryManage = () => {
             where("name", ">=", filter),
             where("name", "<=", filter + "utf8")
           )
-        : query(colRef, limit(POST_PER_PAGE));
-      const documentSnapshots = await getDocs(newRef);
-      const lastVisible =
-        documentSnapshots.docs[documentSnapshots.docs.length - 1];
-      setLastDoc(lastVisible);
+        : colRef;
 
       onSnapshot(newRef, (snapshot) => {
         let result = [];
@@ -60,9 +65,7 @@ const CategoryManage = () => {
         });
         setCategories(result);
       });
-      onSnapshot(colRef, (snapshot) => {
-        setTotal(snapshot.size);
-      });
+
       document.title = "Category Manage";
     }
     fetchData();
@@ -85,27 +88,7 @@ const CategoryManage = () => {
       }
     });
   };
-  const handleLoadMoreCategory = async () => {
-    const nextRef = query(
-      collection(database, "categories"),
-      startAfter(lastDoc),
-      limit(POST_PER_PAGE)
-    );
-    onSnapshot(nextRef, (snapshot) => {
-      let result = [];
-      snapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setCategories([...categories, ...result]);
-    });
-    const documentSnapshots = await getDocs(nextRef);
-    const lastVisible =
-      documentSnapshots.docs[documentSnapshots.docs.length - 1];
-    setLastDoc(lastVisible);
-  };
+
   if (!categories) return;
   return (
     <ManageCategoryStyles>
@@ -139,8 +122,8 @@ const CategoryManage = () => {
           </tr>
         </thead>
         <tbody>
-          {categories.length > 0 &&
-            categories.map((category) => (
+          {currentData.length > 0 &&
+            currentData.map((category) => (
               <tr key={category.id}>
                 <td>{category.id}</td>
                 <td>{category.name}</td>
@@ -155,7 +138,6 @@ const CategoryManage = () => {
                 </td>
                 <td>
                   <div className="flex gap-x-3">
-                    <ActionView></ActionView>
                     <ActionEdit
                       onClick={() =>
                         navigate("/manage/add-category", {
@@ -172,11 +154,14 @@ const CategoryManage = () => {
             ))}
         </tbody>
       </Table>
-      {total > categories.length && (
-        <div className="mt-10">
-          <Button onClick={handleLoadMoreCategory} className="mx-auto">
-            Load more
-          </Button>
+      {categories.length > LIMIT && (
+        <div className="pagination-wrapper">
+          <Paginations
+            totalRecords={NUM_OF_RECORDS}
+            pageLimit={LIMIT}
+            onPageChanged={onPageChanged}
+            currentPage={currentPage}
+          />
         </div>
       )}
     </ManageCategoryStyles>

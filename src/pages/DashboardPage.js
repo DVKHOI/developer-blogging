@@ -1,10 +1,17 @@
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { database } from "../firebase/firebase-config";
 import styled from "styled-components";
 
+import { useCallback } from "react";
+import { postStatus, userRole } from "../utils/constants";
+import { LabelStatus } from "../components/label";
+import { Table } from "../components/table";
+import { useAuth } from "../context/auth-context";
+import { ActionEdit, ActionView } from "../components/action";
+import { useNavigate } from "react-router-dom";
+import Paginations from "../components/pagination/Pagination";
 const DashboardStyles = styled.div`
   .icon {
     transition: all 0.25s;
@@ -16,25 +23,61 @@ const DashboardStyles = styled.div`
   }
 `;
 const DashboardPage = () => {
-  const nagivate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
+  console.log("🚀 ~ file: DashboardPage.js:29 ~ DashboardPage ~ users", users);
+  const { userInfo } = useAuth();
+  const navigate = useNavigate();
+  // pagination page
+  const [currentPage, setCurrentPage] = useState(1);
+  let NUM_OF_RECORDS = posts.length;
+  let LIMIT = 5;
+
+  const onPageChanged = useCallback(
+    (event, page) => {
+      event.preventDefault();
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
+  const currentData = posts.slice(
+    (currentPage - 1) * LIMIT,
+    (currentPage - 1) * LIMIT + LIMIT
+  );
+
   useEffect(() => {
-    function fetchPost() {
-      const colRef = collection(database, "posts");
-      onSnapshot(colRef, (snapshot) => {
-        let results = [];
-        snapshot.forEach((doc) => {
-          results.push({
-            id: doc.id,
-            ...doc.data(),
+    function fetchPostData() {
+      if (userInfo.role === userRole.ADMIN || userInfo.role === userRole.MOD) {
+        const colRef = collection(database, "posts");
+        onSnapshot(colRef, (snapshot) => {
+          let results = [];
+          snapshot.forEach((doc) => {
+            results.push({
+              id: doc.id,
+              ...doc.data(),
+            });
           });
+          setPosts(results);
         });
-        setPosts(results);
-      });
+      } else if (userInfo.role === userRole.USER) {
+        const queries = query(
+          collection(database, "posts"),
+          where("user.email", "==", userInfo.email)
+        );
+        onSnapshot(queries, (snapshot) => {
+          let results = [];
+          snapshot.forEach((doc) => {
+            results.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          });
+          setPosts(results);
+        });
+      }
     }
-    function fetchCategory() {
+    function fetchCategoryData() {
       const colRef = collection(database, "categories");
       onSnapshot(colRef, (snapshot) => {
         let results = [];
@@ -47,7 +90,7 @@ const DashboardPage = () => {
         setCategories(results);
       });
     }
-    function fetchUser() {
+    function fetchUserData() {
       const colRef = collection(database, "users");
       onSnapshot(colRef, (snapshot) => {
         let results = [];
@@ -60,11 +103,29 @@ const DashboardPage = () => {
         setUsers(results);
       });
     }
-    fetchPost();
-    fetchCategory();
-    fetchUser();
+    fetchPostData();
+    fetchCategoryData();
+    fetchUserData();
     document.title = "Dashboard";
-  }, []);
+  }, [userInfo.email, userInfo.role]);
+  const renderStatus = (status) => {
+    switch (status) {
+      case postStatus.APPROVED:
+        return <LabelStatus type="success">Approved</LabelStatus>;
+      case postStatus.PENDING:
+        return <LabelStatus type="warning">Pending</LabelStatus>;
+      case postStatus.REJECTED:
+        return <LabelStatus type="danger">Rejected</LabelStatus>;
+
+      default:
+        break;
+    }
+  };
+  function getLastName(name) {
+    if (!name) return "User";
+    const length = name.split(" ").length;
+    return name.split(" ")[length - 1];
+  }
   return (
     <DashboardStyles>
       <h1 className="mb-5 dashboard-heading">Dashboard page</h1>
@@ -95,7 +156,7 @@ const DashboardPage = () => {
             </p>
             <button
               className="absolute font-semibold text-white bottom-0 left-[50%] -translate-x-[50%] w-full h-[32px] bg-[#1591a5]"
-              onClick={() => nagivate("/manage/post")}
+              onClick={() => navigate("/manage/post")}
             >
               More info
             </button>
@@ -127,7 +188,7 @@ const DashboardPage = () => {
             </p>
             <button
               className="absolute font-semibold text-white bottom-0 left-[50%] -translate-x-[50%] w-full h-[32px] bg-[#24963e]"
-              onClick={() => nagivate("/manage/category")}
+              onClick={() => navigate("/manage/category")}
             >
               More info
             </button>
@@ -159,11 +220,93 @@ const DashboardPage = () => {
             </p>
             <button
               className="absolute font-semibold text-white bottom-0 left-[50%] -translate-x-[50%] w-full h-[32px] bg-[#e5ad06]"
-              onClick={() => nagivate("/manage/user")}
+              onClick={() => navigate("/manage/user")}
             >
               More info
             </button>
           </div>
+        </div>
+      </div>
+      <div className="mt-3 row">
+        <div className="col-lg-8">
+          {currentData.length > 0 && (
+            <Table>
+              <thead>
+                <tr className="text-xl">
+                  <th>Post</th>
+                  <th>Category</th>
+                  <th>Author</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentData.map((item) => (
+                  <tr key={item.id}>
+                    <td>
+                      <div className="flex items-center gap-x-3">
+                        <img
+                          src={item.image}
+                          alt=""
+                          className="w-[66px] h-[55px] rounded object-cover"
+                        />
+                        <div className="flex-1">
+                          <h3 className="text-base ">{item.title}</h3>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{item?.category?.name}</td>
+                    <td>{item?.user?.username}</td>
+                    <td>{renderStatus(item.status)}</td>
+                    <td>
+                      <div className="flex items-center justify-center text-gray-500 gap-x-1">
+                        <ActionView
+                          onClick={() => navigate(`/${item.slug}`)}
+                        ></ActionView>
+                        <ActionEdit
+                          onClick={() =>
+                            navigate("/manage/update-post", {
+                              state: { id: item.id },
+                            })
+                          }
+                        ></ActionEdit>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+          {posts.length > LIMIT && (
+            <div className="pagination-wrapper">
+              <Paginations
+                totalRecords={NUM_OF_RECORDS}
+                pageLimit={LIMIT}
+                onPageChanged={onPageChanged}
+                currentPage={currentPage}
+              />
+            </div>
+          )}
+        </div>
+        <div className="border rounded-lg col-lg-4 border-slate-600 ">
+          <div className="card-header">
+            <h3 class=" border-b-2">List Members</h3>
+          </div>
+          <ul>
+            {users.length > 0 &&
+              users.map((user) => (
+                <li key={user.id} className="inline-block m-4 ">
+                  <img
+                    src={user.avatar}
+                    alt=""
+                    className="w-[70px] h-[70px] rounded-full border border-stone-500"
+                  />
+                  <span className="block text-center">
+                    {getLastName(user.fullname)}
+                  </span>
+                </li>
+              ))}
+          </ul>
         </div>
       </div>
     </DashboardStyles>

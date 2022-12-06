@@ -1,5 +1,6 @@
 import React, { Fragment } from "react";
 import PropTypes from "prop-types";
+import imageUpload from "../../image/img-upload.png";
 const UploadImage = (props) => {
   const {
     name,
@@ -26,7 +27,7 @@ const UploadImage = (props) => {
       {!image && progress === 0 && (
         <div className="flex flex-col items-center text-center pointer-events-none">
           <img
-            src="/img-upload.png"
+            src={imageUpload}
             alt="upload-img"
             className="max-w-[80px] mb-5"
           />

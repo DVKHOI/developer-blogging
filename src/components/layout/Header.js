@@ -7,7 +7,7 @@ import { database } from "../../firebase/firebase-config";
 
 import { Navbar, Container, Nav } from "react-bootstrap";
 import { Button } from "../button";
-
+import coding from "../../image/coding.png";
 const HeaderStyles = styled.header`
   position: fixed;
   top: 0;
@@ -85,7 +85,7 @@ const Header = () => {
           <Container>
             <Navbar.Brand href="/">
               <img
-                srcSet="/coding.png"
+                srcSet={coding}
                 alt=""
                 className="logo animate__animated animate__lightSpeedInLeft"
               />

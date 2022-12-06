@@ -15,6 +15,7 @@ import ToggleInputPassword from "../components/input/ToggleInputPassword";
 import { Label } from "../components/label";
 import slugify from "slugify";
 import { userRole, userStatus } from "../utils/constants";
+import resgiter from "../image/resgiter.png";
 
 const schema = yup.object({
   fullname: yup.string().required("Please enter your fullname"),
@@ -113,7 +114,7 @@ const ResgiterPage = () => {
         </Button>
       </form>
       <div className="main-logo">
-        <img srcSet="/resgiter.png " alt="" className="main-login_img" />
+        <img srcSet={resgiter} alt="" className="main-login_img" />
       </div>
     </AuthenticationPage>
   );

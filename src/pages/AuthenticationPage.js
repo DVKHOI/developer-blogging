@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-
+import coding from "../image/coding.png";
 const AuthentiPageStyles = styled.div`
   height: 100vh;
   padding: 40px;
@@ -9,6 +9,7 @@ const AuthentiPageStyles = styled.div`
 
   .logo {
     margin: 0 auto 20px;
+    max-width: 100px;
   }
   .heading {
     text-align: center;
@@ -47,7 +48,7 @@ const AuthenticationPage = ({ children }) => {
       <div className="container">
         <div className="text-center">
           <NavLink to="/" className="inline-block">
-            <img srcSet="/coding.png 3x" alt="" className="logo" />
+            <img srcSet={coding} alt="" className="logo" />
           </NavLink>
         </div>
         <h1 className="heading">Developer way Blogging</h1>

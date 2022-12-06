@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { Button } from "../../components/button";
 import { useAuth } from "../../context/auth-context";
 import { useNavigate } from "react-router-dom";
+import coding from "../../image/coding.png";
 const DashboardHeaderStyles = styled.div`
   background-color: white;
   padding: 20px;
@@ -45,7 +46,7 @@ const DashboardHeader = () => {
   return (
     <DashboardHeaderStyles>
       <NavLink to="/" className="logo">
-        <img srcSet="/coding.png 2x" alt="monkey-blogging" className="logo" />
+        <img srcSet={coding} alt="monkey-blogging" />
         <span className="hidden lg:inline-block">Developer way</span>
       </NavLink>
       <div className="header-right">

@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import Button from "../../components/button/Button";
-
+import banner from "../../image/banner.png";
 const HomeBannerStyles = styled.div`
   min-height: 520px;
   padding: 40px 0;
@@ -76,7 +76,7 @@ const HomeBanner = () => {
           <div className="order-1 col-xl-6 col-md-12 order-lg-2">
             <div>
               <img
-                src="/banner.png"
+                src={banner}
                 alt="banner"
                 className="banner-image animate__animated animate__backInRight"
               />

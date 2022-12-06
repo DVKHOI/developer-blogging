@@ -14,6 +14,7 @@ import { auth } from "../firebase/firebase-config";
 import Button from "../components/button/Button";
 import ToggleInputPassword from "../components/input/ToggleInputPassword";
 import { Label } from "../components/label";
+import login from "../image/login.png";
 
 const schema = yup.object({
   email: yup
@@ -93,7 +94,7 @@ const LoginPage = () => {
         </Button>
       </form>
       <div className="main-logo">
-        <img srcSet="/login.png " alt="" className="main-logo_img" />
+        <img srcSet={login} alt="" className="main-logo_img" />
       </div>
     </AuthenticationPage>
   );
