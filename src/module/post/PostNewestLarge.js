@@ -45,12 +45,14 @@ const PostNewestLargeStyles = styled.div`
 const PostNewestLarge = ({ data, className = "" }) => {
   return (
     <PostNewestLargeStyles className={className}>
-      <PostImage url={data?.image} alt="unsplash"></PostImage>
+      <PostImage to={data?.slug} url={data?.image} alt="unsplash"></PostImage>
 
       <PostTitle size="big" to={data?.slug}>
         {data?.title}
       </PostTitle>
-      <PostTitle size="mini">{data?.desc?.slice(0, 100) + "..."}</PostTitle>
+      <PostTitle size="mini" to={data?.slug}>
+        {data?.desc?.slice(0, 100) + "..."}
+      </PostTitle>
       <div className="info">
         <div className="avatar">
           <img src={data?.user?.avatar} alt="" />
