@@ -128,7 +128,7 @@ const PostUpdate = () => {
   };
   // document title
   useEffect(() => {
-    document.title = "Sneaker Blogging - Update post ";
+    document.title = "Developer Blogging - Update post ";
   }, []);
 
   const handleUpdatePost = async (values) => {
@@ -159,6 +159,7 @@ const PostUpdate = () => {
       hot: false,
       image: "",
       user: {},
+      desc: "",
     });
     setContent({});
     setSelectCategory({});

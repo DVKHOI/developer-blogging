@@ -26,6 +26,7 @@ import {
 import { auth, database } from "../../firebase/firebase-config";
 import useFirebaseImage from "../../hooks/useFirebaseImage";
 import UploadImage from "../../components/uploadImage/UploadImage";
+import Textarea from "../../components/textarea/Textarea";
 
 const schema = Yup.object({
   fullname: Yup.string().required("Please enter your name"),
@@ -95,7 +96,6 @@ const UserAddNew = () => {
         if (!userId) return;
         const docRef = doc(database, "users", userId);
         const docData = await getDoc(docRef);
-
         reset(docData && docData.data());
       }
       fetchData();
@@ -119,6 +119,7 @@ const UserAddNew = () => {
           username: slugify(values.username || values.fullname, {
             lower: true,
           }),
+          description: values.desc,
           avatar: image,
           status: Number(values.status),
           role: Number(values.role),
@@ -133,6 +134,7 @@ const UserAddNew = () => {
           username: slugify(values.username || values.fullname, {
             lower: true,
           }),
+          description: values.desc,
           avatar: image,
           status: Number(values.status),
           role: Number(values.role),
@@ -207,6 +209,17 @@ const UserAddNew = () => {
           <Field>
             <Label>Password</Label>
             <ToggleInputPassword control={control}></ToggleInputPassword>
+          </Field>
+        </div>
+        <div className="w-full my-10">
+          <Field>
+            <Label>Description</Label>
+            <Textarea
+              name="description"
+              control={control}
+              placeholder="Enter your description"
+              className="h-[100px]"
+            ></Textarea>
           </Field>
         </div>
         <div className="form-layout">

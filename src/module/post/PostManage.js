@@ -22,31 +22,52 @@ const PostManage = () => {
   const [listPosts, setListPost] = useState([]);
   const [filter, setFilter] = useState("");
   const navigate = useNavigate();
+  const { userInfo } = useAuth();
+
   useEffect(() => {
     async function fetchData() {
-      const colRef = collection(database, "posts");
-      const newRef = filter
-        ? query(
-            colRef,
-            where("title", ">=", filter),
-            where("title", "<=", filter + "utf8")
-          )
-        : colRef;
-
-      onSnapshot(newRef, (snapshot) => {
-        let result = [];
-        snapshot.forEach((doc) => {
-          result.push({
-            id: doc.id,
-            ...doc.data(),
+      if (userInfo.role === userRole.USER) {
+        const queries = query(
+          collection(database, "posts"),
+          where("user.email", "==", userInfo.email),
+          where("title", ">=", filter),
+          where("title", "<=", filter + "utf8")
+        );
+        onSnapshot(queries, (snapshot) => {
+          let results = [];
+          snapshot.forEach((doc) => {
+            results.push({
+              id: doc.id,
+              ...doc.data(),
+            });
           });
+          setListPost(results);
         });
-        setListPost(result);
-      });
+      } else {
+        const colRef = collection(database, "posts");
+        const newRef = filter
+          ? query(
+              colRef,
+              where("title", ">=", filter),
+              where("title", "<=", filter + "utf8")
+            )
+          : colRef;
+
+        onSnapshot(newRef, (snapshot) => {
+          let result = [];
+          snapshot.forEach((doc) => {
+            result.push({
+              id: doc.id,
+              ...doc.data(),
+            });
+          });
+          setListPost(result);
+        });
+      }
     }
     fetchData();
     document.title = "Post Manage";
-  }, [filter]);
+  }, [filter, userInfo.email, userInfo.role]);
 
   const renderStatus = (status) => {
     switch (status) {
@@ -94,7 +115,6 @@ const PostManage = () => {
     (currentPage - 1) * LIMIT,
     (currentPage - 1) * LIMIT + LIMIT
   );
-  const { userInfo } = useAuth();
   return (
     <div>
       <h1 className="dashboard-heading">Manage post</h1>
@@ -146,7 +166,7 @@ const PostManage = () => {
                   <span className="text-gray-500">{post.category?.name}</span>
                 </td>
                 <td>
-                  <span className="text-gray-500">{post.user?.username}</span>
+                  <span className="text-gray-500">{post.user?.fullname}</span>
                 </td>
                 <td>{renderStatus(post.status)}</td>
                 <td>
@@ -161,12 +181,9 @@ const PostManage = () => {
                         })
                       }
                     ></ActionEdit>
-
-                    {userInfo.role === userRole.ADMIN && (
-                      <ActionDelete
-                        onClick={() => handleDeletePost(post)}
-                      ></ActionDelete>
-                    )}
+                    <ActionDelete
+                      onClick={() => handleDeletePost(post)}
+                    ></ActionDelete>
                   </div>
                 </td>
               </tr>

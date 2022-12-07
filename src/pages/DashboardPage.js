@@ -26,7 +26,6 @@ const DashboardPage = () => {
   const [posts, setPosts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [users, setUsers] = useState([]);
-  console.log("🚀 ~ file: DashboardPage.js:29 ~ DashboardPage ~ users", users);
   const { userInfo } = useAuth();
   const navigate = useNavigate();
   // pagination page
@@ -256,7 +255,7 @@ const DashboardPage = () => {
                       </div>
                     </td>
                     <td>{item?.category?.name}</td>
-                    <td>{item?.user?.username}</td>
+                    <td>{item?.user?.fullname}</td>
                     <td>{renderStatus(item.status)}</td>
                     <td>
                       <div className="flex items-center justify-center text-gray-500 gap-x-1">
@@ -290,9 +289,9 @@ const DashboardPage = () => {
         </div>
         <div className="border rounded-lg col-lg-4 border-slate-600 ">
           <div className="card-header">
-            <h3 class=" border-b-2">List Members</h3>
+            <h3 className="border-b-2 ">List Members</h3>
           </div>
-          <ul>
+          <ul className="pl-5">
             {users.length > 0 &&
               users.map((user) => (
                 <li key={user.id} className="inline-block m-4 ">
