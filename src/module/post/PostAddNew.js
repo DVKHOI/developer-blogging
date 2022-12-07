@@ -197,13 +197,16 @@ const PostAddNew = () => {
           </Field>
         </div>
         <div className="form-layout">
-          <Field>
-            <Label>Feature Hot</Label>
-            <Toggle
-              on={watchHot === true}
-              onClick={() => setValue("hot", !watchHot)}
-            ></Toggle>
-          </Field>
+          {(userInfo?.role === userRole.ADMIN ||
+            userInfo?.role === userRole.MOD) && (
+            <Field>
+              <Label>Feature Hot</Label>
+              <Toggle
+                on={watchHot === true}
+                onClick={() => setValue("hot", !watchHot)}
+              ></Toggle>
+            </Field>
+          )}
           {(userInfo?.role === userRole.ADMIN ||
             userInfo?.role === userRole.MOD) && (
             <Field>
