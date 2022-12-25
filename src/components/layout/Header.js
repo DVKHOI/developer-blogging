@@ -1,9 +1,7 @@
-import { collection, onSnapshot } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../../context/auth-context";
-import { database } from "../../firebase/firebase-config";
 
 import { Navbar, Container, Nav } from "react-bootstrap";
 import { Button } from "../button";
@@ -84,20 +82,7 @@ function getLastName(name) {
 }
 const Header = () => {
   const { userInfo } = useAuth();
-  const [listMenu, setListMenu] = useState([]);
-  useEffect(() => {
-    const colRef = collection(database, "categories");
-    onSnapshot(colRef, (snapshot) => {
-      let result = [];
-      snapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setListMenu(result);
-    });
-  }, []);
+
   return (
     <HeaderStyles>
       <>
@@ -140,13 +125,6 @@ const Header = () => {
                     );
                   }
                 })}
-                {/* <Nav.Link
-                    key={menu.name}
-                    className="menu animate__animated animate__lightSpeedInLeft"
-                    href={`/category/${menu.url}`}
-                  >
-                    {menu.name}
-                  </Nav.Link> */}
               </Nav>
               <Nav>
                 <div className="header-info animate__animated animate__lightSpeedInRight">
