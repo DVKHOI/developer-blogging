@@ -51,7 +51,32 @@ const HeaderStyles = styled.header`
     align-items: center;
   }
 `;
-
+const menu = [
+  {
+    name: "Home",
+    url: "/",
+  },
+  {
+    name: "Ferformance",
+    url: "ferformance",
+  },
+  {
+    name: "Typescrip",
+    url: "typescrip",
+  },
+  {
+    name: "React",
+    url: "react",
+  },
+  {
+    name: "Re-renders",
+    url: "re-renders",
+  },
+  {
+    name: "Composition",
+    url: "composition",
+  },
+];
 function getLastName(name) {
   if (!name) return "User";
   const length = name.split(" ").length;
@@ -93,21 +118,35 @@ const Header = () => {
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
             <Navbar.Collapse id="responsive-navbar-nav">
               <Nav className=" me-auto">
-                <Nav.Link
-                  className="menu animate__animated animate__lightSpeedInLeft"
-                  href="/"
-                >
-                  Home
-                </Nav.Link>
-                {listMenu.map((menu) => (
-                  <Nav.Link
-                    key={menu.id}
+                {menu.map((menu) => {
+                  if (menu.name === "Home") {
+                    return (
+                      <Nav.Link
+                        className="menu animate__animated animate__lightSpeedInLeft"
+                        href="/"
+                      >
+                        Home
+                      </Nav.Link>
+                    );
+                  } else {
+                    return (
+                      <Nav.Link
+                        key={menu.name}
+                        className="menu animate__animated animate__lightSpeedInLeft"
+                        href={`/category/${menu.url}`}
+                      >
+                        {menu.name}
+                      </Nav.Link>
+                    );
+                  }
+                })}
+                {/* <Nav.Link
+                    key={menu.name}
                     className="menu animate__animated animate__lightSpeedInLeft"
-                    href={`/category/${menu.slug}`}
+                    href={`/category/${menu.url}`}
                   >
                     {menu.name}
-                  </Nav.Link>
-                ))}
+                  </Nav.Link> */}
               </Nav>
               <Nav>
                 <div className="header-info animate__animated animate__lightSpeedInRight">
