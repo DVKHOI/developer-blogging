@@ -4,7 +4,7 @@ import Layout from "../../../components/layout/Layout";
 const Privacy = () => {
   return (
     <Layout>
-      <div className="mt-[120px] container leading-[32px] text-xl mb-5 p-6">
+      <div className="mt-[120px] max-w-[1000px] mx-auto leading-[32px] text-xl mb-[120px] p-6">
         <h2 className="text-[40px] font-medium text-[#08090d] mb-[48px] leading-[48px]">
           Privacy policy
         </h2>
