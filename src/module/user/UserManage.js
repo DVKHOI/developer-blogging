@@ -1,11 +1,4 @@
-import {
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -18,6 +11,7 @@ import Paginations from "../../components/pagination/Pagination";
 import Table from "../../components/table/Table";
 import { useAuth } from "../../context/auth-context";
 import { database } from "../../firebase/firebase-config";
+import useDebounce from "../../hooks/useDebounce";
 import { userRole, userStatus } from "../../utils/constants";
 import Dashboard404 from "../dashboard/Dashboard404";
 import DashboardHeading from "../dashboard/DashboardHeading";
@@ -27,35 +21,18 @@ const UserManage = () => {
   const navigate = useNavigate();
   const [listUsers, setListUsers] = useState([]);
   const { userInfo } = useAuth();
-
+  const handleSearch = (e) => {
+    setFilter(e.target.value);
+  };
+  const filterDebounce = useDebounce(filter, 500);
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
-  let NUM_OF_RECORDS = listUsers.length;
-  let LIMIT = 3;
 
-  const onPageChanged = useCallback(
-    (event, page) => {
-      event.preventDefault();
-      setCurrentPage(page);
-    },
-    [setCurrentPage]
-  );
-  const currentData = listUsers.slice(
-    (currentPage - 1) * LIMIT,
-    (currentPage - 1) * LIMIT + LIMIT
-  );
   useEffect(() => {
     async function fetchData() {
       const colRef = collection(database, "users");
-      const newRef = filter
-        ? query(
-            colRef,
-            where("fullname", ">=", filter),
-            where("fullname", "<=", filter + "utf8")
-          )
-        : colRef;
 
-      onSnapshot(newRef, (snapshot) => {
+      onSnapshot(colRef, (snapshot) => {
         let results = [];
         snapshot.forEach((doc) => {
           results.push({
@@ -68,7 +45,34 @@ const UserManage = () => {
     }
     fetchData();
     document.title = "User Manage";
-  }, [filter]);
+  }, []);
+  const [users, setUsers] = useState([]);
+  useEffect(() => {
+    if (filterDebounce) {
+      const result = listUsers.filter((user) =>
+        user.fullname
+          .toLowerCase()
+          .includes(filterDebounce.trim().toLowerCase())
+      );
+      setUsers(result);
+    } else {
+      setUsers(listUsers);
+    }
+  }, [filterDebounce, listUsers]);
+  let NUM_OF_RECORDS = users.length;
+  let LIMIT = 3;
+
+  const onPageChanged = useCallback(
+    (event, page) => {
+      event.preventDefault();
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
+  const currentData = users.slice(
+    (currentPage - 1) * LIMIT,
+    (currentPage - 1) * LIMIT + LIMIT
+  );
   if (userInfo.role !== userRole.ADMIN) return <Dashboard404></Dashboard404>;
   const handleDeleteUser = async (userId) => {
     const docRef = doc(database, "users", userId);
@@ -130,7 +134,7 @@ const UserManage = () => {
           type="text"
           className="p-3 border border-gray-200 rounded-lg "
           placeholder="Search"
-          onChange={(e) => setFilter(e.target.value)}
+          onChange={handleSearch}
         />
       </div>
       <Table>

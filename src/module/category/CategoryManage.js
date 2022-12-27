@@ -1,11 +1,4 @@
-import {
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
+import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
@@ -21,41 +14,24 @@ import Swal from "sweetalert2";
 import { useAuth } from "../../context/auth-context";
 import Dashboard404 from "../dashboard/Dashboard404";
 import Paginations from "../../components/pagination/Pagination";
+import useDebounce from "../../hooks/useDebounce";
 
 const ManageCategoryStyles = styled.div``;
 const CategoryManage = () => {
   const [categories, setCategories] = useState([]);
+  const [listCategory, setListCategory] = useState([]);
+
   const [filter, setFilter] = useState("");
   const navigate = useNavigate();
   const { userInfo } = useAuth();
-  // pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  let NUM_OF_RECORDS = categories.length;
-  let LIMIT = 3;
 
-  const onPageChanged = useCallback(
-    (event, page) => {
-      event.preventDefault();
-      setCurrentPage(page);
-    },
-    [setCurrentPage]
-  );
-  const currentData = categories.slice(
-    (currentPage - 1) * LIMIT,
-    (currentPage - 1) * LIMIT + LIMIT
-  );
+  const filterDebounce = useDebounce(filter, 500);
+
   useEffect(() => {
     async function fetchData() {
       const colRef = collection(database, "categories");
-      const newRef = filter
-        ? query(
-            colRef,
-            where("name", ">=", filter),
-            where("name", "<=", filter + "utf8")
-          )
-        : colRef;
 
-      onSnapshot(newRef, (snapshot) => {
+      onSnapshot(colRef, (snapshot) => {
         let result = [];
         snapshot.forEach((doc) => {
           result.push({
@@ -70,6 +46,34 @@ const CategoryManage = () => {
     }
     fetchData();
   }, [filter]);
+  useEffect(() => {
+    if (filterDebounce) {
+      const result = categories.filter((category) =>
+        category.name
+          .toLowerCase()
+          .includes(filterDebounce.trim().toLowerCase())
+      );
+      setListCategory(result);
+    } else {
+      setListCategory(categories);
+    }
+  }, [filterDebounce, categories]);
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  let NUM_OF_RECORDS = listCategory.length;
+  let LIMIT = 3;
+
+  const onPageChanged = useCallback(
+    (event, page) => {
+      event.preventDefault();
+      setCurrentPage(page);
+    },
+    [setCurrentPage]
+  );
+  const currentData = listCategory.slice(
+    (currentPage - 1) * LIMIT,
+    (currentPage - 1) * LIMIT + LIMIT
+  );
   if (userInfo.role !== userRole.ADMIN) return <Dashboard404></Dashboard404>;
   const handleDeleteCategory = async (catrgoryId) => {
     const docRef = doc(database, "categories", catrgoryId);

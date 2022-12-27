@@ -116,7 +116,7 @@ const PostUpdate = () => {
   }, []);
   // select category name
   const handleSelectCategory = async (item) => {
-    const colRef = doc(database, "posts", item.id);
+    const colRef = doc(database, "categories", item.id);
     const docData = await getDoc(colRef);
 
     setValue("category", {
@@ -240,11 +240,6 @@ const PostUpdate = () => {
                     </Dropdown.Option>
                   ))}
               </Dropdown.List>
-              {/* {selectCategory.name && (
-                <span className="inline-block p-3 mt-3 text-sm font-medium bg-gray-200 rounded-lg">
-                  {selectCategory.name}
-                </span>
-              )} */}
             </Dropdown>
           </Field>
         </div>

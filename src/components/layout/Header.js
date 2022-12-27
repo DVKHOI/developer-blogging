@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../../context/auth-context";
 
@@ -55,8 +55,8 @@ const menu = [
     url: "/",
   },
   {
-    name: "Ferformance",
-    url: "ferformance",
+    name: "Performance",
+    url: "performance",
   },
   {
     name: "Typescrip",
@@ -106,22 +106,23 @@ const Header = () => {
                 {menu.map((menu) => {
                   if (menu.name === "Home") {
                     return (
-                      <Nav.Link
+                      <NavLink
+                        key={menu.name}
                         className="menu animate__animated animate__lightSpeedInLeft"
-                        href="/"
+                        to="/"
                       >
                         Home
-                      </Nav.Link>
+                      </NavLink>
                     );
                   } else {
                     return (
-                      <Nav.Link
+                      <NavLink
                         key={menu.name}
                         className="menu animate__animated animate__lightSpeedInLeft"
-                        href={`/category/${menu.url}`}
+                        to={`/category/${menu.url}`}
                       >
                         {menu.name}
-                      </Nav.Link>
+                      </NavLink>
                     );
                   }
                 })}

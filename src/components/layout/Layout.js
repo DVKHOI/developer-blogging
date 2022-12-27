@@ -1,5 +1,5 @@
 import React, { Fragment } from "react";
-import { Footer } from "../../module/home/HomeFooter";
+import { Footer } from "../../module/home/footer/HomeFooter";
 import Header from "./Header";
 
 const Layout = ({ children }) => {

@@ -16,22 +16,31 @@ import Paginations from "../../components/pagination/Pagination";
 import { Table } from "../../components/table";
 import { useAuth } from "../../context/auth-context";
 import { database } from "../../firebase/firebase-config";
+import useDebounce from "../../hooks/useDebounce";
 import { postStatus, userRole } from "../../utils/constants";
 
 const PostManage = () => {
   const [listPosts, setListPost] = useState([]);
+  console.log(
+    "🚀 ~ file: PostManage.js:24 ~ PostManage ~ listPosts",
+    listPosts
+  );
+
   const [filter, setFilter] = useState("");
   const navigate = useNavigate();
   const { userInfo } = useAuth();
+
+  const handleSearch = (e) => {
+    setFilter(e.target.value);
+  };
+  const filterDebounce = useDebounce(filter, 500);
 
   useEffect(() => {
     async function fetchData() {
       if (userInfo.role === userRole.USER) {
         const queries = query(
           collection(database, "posts"),
-          where("user.email", "==", userInfo.email),
-          where("title", ">=", filter),
-          where("title", "<=", filter + "utf8")
+          where("user.email", "==", userInfo.email)
         );
         onSnapshot(queries, (snapshot) => {
           let results = [];
@@ -45,15 +54,8 @@ const PostManage = () => {
         });
       } else {
         const colRef = collection(database, "posts");
-        const newRef = filter
-          ? query(
-              colRef,
-              where("title", ">=", filter),
-              where("title", "<=", filter + "utf8")
-            )
-          : colRef;
 
-        onSnapshot(newRef, (snapshot) => {
+        onSnapshot(colRef, (snapshot) => {
           let result = [];
           snapshot.forEach((doc) => {
             result.push({
@@ -67,8 +69,18 @@ const PostManage = () => {
     }
     fetchData();
     document.title = "Post Manage";
-  }, [filter, userInfo.email, userInfo.role]);
-
+  }, [userInfo.email, userInfo.role]);
+  const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    if (filterDebounce) {
+      const result = listPosts.filter((post) =>
+        post.title.toLowerCase().includes(filterDebounce.trim().toLowerCase())
+      );
+      setPosts(result);
+    } else {
+      setPosts(listPosts);
+    }
+  }, [filterDebounce, listPosts]);
   const renderStatus = (status) => {
     switch (status) {
       case postStatus.APPROVED:
@@ -99,9 +111,10 @@ const PostManage = () => {
       }
     });
   };
+
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
-  let NUM_OF_RECORDS = listPosts.length;
+  let NUM_OF_RECORDS = posts.length;
   let LIMIT = 5;
 
   const onPageChanged = useCallback(
@@ -111,7 +124,7 @@ const PostManage = () => {
     },
     [setCurrentPage]
   );
-  const currentData = listPosts.slice(
+  const currentData = posts.slice(
     (currentPage - 1) * LIMIT,
     (currentPage - 1) * LIMIT + LIMIT
   );
@@ -119,12 +132,12 @@ const PostManage = () => {
     <div>
       <h1 className="dashboard-heading">Manage post</h1>
       <div className="flex justify-end mb-10">
-        <div className="w-full max-w-[300px]">
+        <div className="w-full max-w-[200px]">
           <input
             type="text"
-            className="w-full p-4 border border-gray-300 border-solid rounded-lg"
+            className="w-full p-3 border border-gray-300 border-solid rounded-lg"
             placeholder="Search post..."
-            onChange={(e) => setFilter(e.target.value)}
+            onChange={handleSearch}
           />
         </div>
       </div>

@@ -7,14 +7,8 @@ import { database } from "../../firebase/firebase-config";
 import PostItem from "./PostItem";
 
 const PostRelated = ({ categoryId = "" }) => {
-  // console.log(
-  //   "🚀 ~ file: PostRelated.js:10 ~ PostRelated ~ categoryId",
-  //   categoryId
-  // );
-  // console.log(categoryId === "oTkQnzlvdVDYkD2y326S");
   const [posts, setPosts] = useState([]);
   useEffect(() => {
-    // if (!categoryId) return;
     const docRef = query(
       collection(database, "posts"),
       where("category.id", "==", categoryId)
