@@ -1,7 +1,5 @@
-import { collection, onSnapshot, query, where } from "firebase/firestore";
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { database } from "../firebase/firebase-config";
 import styled from "styled-components";
 
 import { useCallback } from "react";
@@ -12,6 +10,8 @@ import { useAuth } from "../context/auth-context";
 import { ActionEdit, ActionView } from "../components/action";
 import { useNavigate } from "react-router-dom";
 import Paginations from "../components/pagination/Pagination";
+import { useSelector } from "react-redux";
+import PostMeta from "../module/post/PostMeta";
 const DashboardStyles = styled.div`
   .icon {
     transition: all 0.25s;
@@ -23,90 +23,60 @@ const DashboardStyles = styled.div`
   }
 `;
 const DashboardPage = () => {
+  const listPosts = useSelector((state) => state.postsRedux.posts);
+  const listCategories = useSelector((state) => state.categoryRedux.categories);
+  const listUsers = useSelector((state) => state.usersRedux.users);
   const [posts, setPosts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [users, setUsers] = useState([]);
   const { userInfo } = useAuth();
   const navigate = useNavigate();
-  // pagination page
-  const [currentPage, setCurrentPage] = useState(1);
-  let NUM_OF_RECORDS = posts.length;
-  let LIMIT = 5;
 
-  const onPageChanged = useCallback(
+  // pagination post page
+  const [currentPage, setCurrentPage] = useState(1);
+  let NUM_OF_RECORDS_POST = posts.length;
+  let LIMIT_POST = 5;
+
+  const onPostPageChanged = useCallback(
     (event, page) => {
       event.preventDefault();
       setCurrentPage(page);
     },
     [setCurrentPage]
   );
-  const currentData = posts.slice(
-    (currentPage - 1) * LIMIT,
-    (currentPage - 1) * LIMIT + LIMIT
+  const currentPostData = posts.slice(
+    (currentPage - 1) * LIMIT_POST,
+    (currentPage - 1) * LIMIT_POST + LIMIT_POST
+  );
+  // pagination post page
+  const [currenUsertPage, setCurrentUserPage] = useState(1);
+  let NUM_OF_RECORDS_USER = listUsers.length;
+  let LIMIT_USER = 3;
+
+  const onUserPageChanged = useCallback(
+    (event, page) => {
+      event.preventDefault();
+      setCurrentUserPage(page);
+    },
+    [setCurrentUserPage]
+  );
+  const currentData = listUsers.slice(
+    (currenUsertPage - 1) * LIMIT_USER,
+    (currenUsertPage - 1) * LIMIT_USER + LIMIT_USER
   );
 
   useEffect(() => {
     function fetchPostData() {
       if (userInfo.role === userRole.ADMIN || userInfo.role === userRole.MOD) {
-        const colRef = collection(database, "posts");
-        onSnapshot(colRef, (snapshot) => {
-          let results = [];
-          snapshot.forEach((doc) => {
-            results.push({
-              id: doc.id,
-              ...doc.data(),
-            });
-          });
-          setPosts(results);
-        });
+        setPosts(listPosts);
       } else if (userInfo.role === userRole.USER) {
-        const queries = query(
-          collection(database, "posts"),
-          where("user.email", "==", userInfo.email)
+        const results = listPosts.filter(
+          (post) => post.user.role === userInfo.role
         );
-        onSnapshot(queries, (snapshot) => {
-          let results = [];
-          snapshot.forEach((doc) => {
-            results.push({
-              id: doc.id,
-              ...doc.data(),
-            });
-          });
-          setPosts(results);
-        });
+        setPosts(results);
       }
     }
-    function fetchCategoryData() {
-      const colRef = collection(database, "categories");
-      onSnapshot(colRef, (snapshot) => {
-        let results = [];
-        snapshot.forEach((doc) => {
-          results.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        setCategories(results);
-      });
-    }
-    function fetchUserData() {
-      const colRef = collection(database, "users");
-      onSnapshot(colRef, (snapshot) => {
-        let results = [];
-        snapshot.forEach((doc) => {
-          results.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        setUsers(results);
-      });
-    }
     fetchPostData();
-    fetchCategoryData();
-    fetchUserData();
     document.title = "Dashboard";
-  }, [userInfo.email, userInfo.role]);
+  }, [listPosts, userInfo.email, userInfo.role]);
   const renderStatus = (status) => {
     switch (status) {
       case postStatus.APPROVED:
@@ -120,11 +90,7 @@ const DashboardPage = () => {
         break;
     }
   };
-  function getLastName(name) {
-    if (!name) return "User";
-    const length = name.split(" ").length;
-    return name.split(" ")[length - 1];
-  }
+
   return (
     <DashboardStyles>
       <h1 className="mb-5 dashboard-heading">Dashboard page</h1>
@@ -164,7 +130,7 @@ const DashboardPage = () => {
         <div className="col-lg-4">
           <div className=" w-full border border-blue-500 h-[150px] bg-[#28a745] rounded-lg relative dashboard-content">
             <p className="absolute text-3xl font-semibold text-white top-3 left-3">
-              {categories.length}
+              {listCategories.length}
             </p>
             <p className="absolute text-xl font-semibold text-white top-14 left-3">
               Category
@@ -196,7 +162,7 @@ const DashboardPage = () => {
         <div className="col-lg-4">
           <div className=" w-full border border-blue-500 h-[150px] bg-[#ffc107] rounded-lg relative dashboard-content">
             <p className="absolute text-3xl font-semibold text-white top-3 left-3">
-              {users.length}
+              {listUsers.length}
             </p>
             <p className="absolute text-xl font-semibold text-white top-14 left-3">
               User
@@ -228,7 +194,7 @@ const DashboardPage = () => {
       </div>
       <div className="mt-3 row">
         <div className="col-lg-8">
-          {currentData.length > 0 && (
+          {currentPostData.length > 0 && (
             <Table>
               <thead>
                 <tr className="text-xl">
@@ -240,7 +206,7 @@ const DashboardPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentData.map((item) => (
+                {currentPostData.map((item) => (
                   <tr key={item.id}>
                     <td>
                       <div className="flex items-center gap-x-3">
@@ -276,36 +242,49 @@ const DashboardPage = () => {
               </tbody>
             </Table>
           )}
-          {posts.length > LIMIT && (
+          {posts.length > LIMIT_POST && (
             <div className="pagination-wrapper">
               <Paginations
-                totalRecords={NUM_OF_RECORDS}
-                pageLimit={LIMIT}
-                onPageChanged={onPageChanged}
-                currentPage={currentPage}
+                totalRecords={NUM_OF_RECORDS_POST}
+                pageLimit={LIMIT_POST}
+                onPageChanged={onPostPageChanged}
+                currentPage={currentPostData}
               />
             </div>
           )}
         </div>
-        <div className="border rounded-lg col-lg-4 border-slate-600 ">
+        <div className="rounded-lg col-lg-4">
           <div className="card-header">
             <h3 className="border-b-2 ">List Members</h3>
           </div>
           <ul className="pl-5">
-            {users.length > 0 &&
-              users.map((user) => (
-                <li key={user.id} className="inline-block m-4 ">
+            {currentData.length > 0 &&
+              currentData.map((user) => (
+                <li key={user.id} className="flex m-4 gap-x-4">
                   <img
                     src={user.avatar}
                     alt=""
-                    className="w-[70px] h-[70px] rounded-full border border-stone-500"
+                    className="w-[50px] h-[50px] rounded-full border border-stone-500 inline-block"
                   />
-                  <span className="block text-center">
-                    {getLastName(user.fullname)}
-                  </span>
+                  <PostMeta
+                    authorName={user.fullname}
+                    date={new Date(
+                      user?.createdAt?.seconds * 1000
+                    ).toLocaleDateString("vi-VI")}
+                  ></PostMeta>
                 </li>
               ))}
           </ul>
+          {listUsers.length > LIMIT_USER && (
+            <div className="pagination-wrapper">
+              <Paginations
+                totalRecords={NUM_OF_RECORDS_USER}
+                pageLimit={LIMIT_USER}
+                onPageChanged={onUserPageChanged}
+                currentPage={currenUsertPage}
+              />
+            </div>
+          )}
         </div>
       </div>
     </DashboardStyles>

@@ -8,15 +8,7 @@ import UploadImage from "../../components/uploadImage";
 import DashboardHeading from "../dashboard/DashboardHeading";
 import { useLocation } from "react-router-dom";
 import useFirebaseImage from "../../hooks/useFirebaseImage";
-import {
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { database } from "../../firebase/firebase-config";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -25,6 +17,7 @@ import slugify from "slugify";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useSelector } from "react-redux";
 
 const schema = Yup.object({
   fullname: Yup.string().required("Please enter your name"),
@@ -45,7 +38,7 @@ const UserProfile = () => {
   const { state } = useLocation();
   const email = state.email;
   const [user, setuser] = useState([]);
-
+  const listUsers = useSelector((state) => state.usersRedux.users);
   const userObj = user[0];
   const userId = userObj?.id;
 
@@ -97,23 +90,11 @@ const UserProfile = () => {
 
   useEffect(() => {
     async function fetchData() {
-      const queries = query(
-        collection(database, "users"),
-        where("email", "==", email)
-      );
-      onSnapshot(queries, (snapsot) => {
-        let result = [];
-        snapsot.forEach((doc) => {
-          result.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        setuser(result);
-      });
+      const result = listUsers.filter((user) => user.email === email);
+      setuser(result);
     }
     fetchData();
-  }, [email]);
+  }, [email, listUsers]);
   useEffect(() => {
     async function fetchData() {
       if (!userId) return;

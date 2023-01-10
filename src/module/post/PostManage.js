@@ -1,13 +1,7 @@
-import {
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
+import { deleteDoc, doc } from "firebase/firestore";
 import React, { useCallback, useState } from "react";
 import { useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { ActionDelete, ActionEdit, ActionView } from "../../components/action";
@@ -18,17 +12,17 @@ import { useAuth } from "../../context/auth-context";
 import { database } from "../../firebase/firebase-config";
 import useDebounce from "../../hooks/useDebounce";
 import { postStatus, userRole } from "../../utils/constants";
-
 const PostManage = () => {
   const [listPosts, setListPost] = useState([]);
   console.log(
-    "🚀 ~ file: PostManage.js:24 ~ PostManage ~ listPosts",
+    "🚀 ~ file: PostManage.js:18 ~ PostManage ~ listPosts",
     listPosts
   );
-
   const [filter, setFilter] = useState("");
   const navigate = useNavigate();
   const { userInfo } = useAuth();
+
+  const post = useSelector((state) => state.postsRedux.posts);
 
   const handleSearch = (e) => {
     setFilter(e.target.value);
@@ -36,40 +30,18 @@ const PostManage = () => {
   const filterDebounce = useDebounce(filter, 500);
 
   useEffect(() => {
-    async function fetchData() {
+    function fetchData() {
       if (userInfo.role === userRole.USER) {
-        const queries = query(
-          collection(database, "posts"),
-          where("user.email", "==", userInfo.email)
-        );
-        onSnapshot(queries, (snapshot) => {
-          let results = [];
-          snapshot.forEach((doc) => {
-            results.push({
-              id: doc.id,
-              ...doc.data(),
-            });
-          });
-          setListPost(results);
-        });
+        const results = post.filter((post) => post.user.role === userInfo.role);
+        setListPost(results);
       } else {
-        const colRef = collection(database, "posts");
-
-        onSnapshot(colRef, (snapshot) => {
-          let result = [];
-          snapshot.forEach((doc) => {
-            result.push({
-              id: doc.id,
-              ...doc.data(),
-            });
-          });
-          setListPost(result);
-        });
+        setListPost(post);
       }
     }
     fetchData();
     document.title = "Post Manage";
-  }, [userInfo.email, userInfo.role]);
+  }, [post, userInfo.email, userInfo.role]);
+
   const [posts, setPosts] = useState([]);
   useEffect(() => {
     if (filterDebounce) {

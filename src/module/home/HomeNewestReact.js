@@ -1,49 +1,27 @@
-import {
-  collection,
-  limit,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Heading from "../../components/layout/Heading";
-import { database } from "../../firebase/firebase-config";
 import PostNewestLarge, { NewwesItemSkeleton } from "../post/PostNewestLarge";
 
 const HomeNewestStyles = styled.div``;
-const POST_PER_PAGE = 6;
+
 const HomeNewestReact = ({ params = "" }) => {
   const [posts, setPosts] = useState([]);
+  const listPosts = useSelector((state) => state.postsRedux.posts);
 
   const isLoading = posts.length <= 0;
   useEffect(() => {
     async function fetchData() {
-      const colRef = collection(database, "posts");
-
-      const queriesParams = query(
-        colRef,
-        where("status", "==", 1),
-        where("hot", "==", false),
-        where("category.slug", "==", "react"),
-        limit(POST_PER_PAGE)
+      const results = listPosts.filter(
+        (post) => post.category.slug === "react"
       );
-
-      onSnapshot(queriesParams, (snapshot) => {
-        const results = [];
-        snapshot.forEach((doc) => {
-          results.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        setPosts(results);
-      });
+      setPosts(results);
     }
     fetchData();
-  }, [params]);
+  }, [listPosts]);
 
   return (
     <HomeNewestStyles className="home-block">

@@ -28,6 +28,7 @@ import { toast } from "react-toastify";
 import useFirebaseImage from "../../hooks/useFirebaseImage";
 import { useNavigate } from "react-router-dom";
 import Textarea from "../../components/textarea/Textarea";
+import { useSelector } from "react-redux";
 
 const PostAddNewStyles = styled.div``;
 const PostAddNew = () => {
@@ -55,23 +56,17 @@ const PostAddNew = () => {
   const [selectCategory, setSelectCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const { userInfo } = useAuth();
+  const listCategories = useSelector((state) => state.categoryRedux.categories);
   useEffect(() => {
     async function getData() {
-      const colRef = collection(database, "categories");
-      const q = query(colRef, where("status", "==", 1));
-      const querySnapshot = await getDocs(q);
-      let result = [];
-      querySnapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
+      const results = listCategories.filter(
+        (category) => category.status === 1
+      );
 
-      setCategories(result);
+      setCategories(results);
     }
     getData();
-  }, []);
+  }, [listCategories]);
   const watchStatus = watch("status");
   const watchHot = watch("hot");
   useEffect(() => {

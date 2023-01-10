@@ -1,5 +1,6 @@
-import { collection, deleteDoc, doc, onSnapshot } from "firebase/firestore";
+import { deleteDoc, doc } from "firebase/firestore";
 import React, { useCallback, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import ActionDelete from "../../components/action/ActionDelete";
@@ -19,8 +20,8 @@ import DashboardHeading from "../dashboard/DashboardHeading";
 const UserManage = () => {
   const [filter, setFilter] = useState("");
   const navigate = useNavigate();
-  const [listUsers, setListUsers] = useState([]);
   const { userInfo } = useAuth();
+  const listUsers = useSelector((state) => state.usersRedux.users);
   const handleSearch = (e) => {
     setFilter(e.target.value);
   };
@@ -28,24 +29,6 @@ const UserManage = () => {
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
 
-  useEffect(() => {
-    async function fetchData() {
-      const colRef = collection(database, "users");
-
-      onSnapshot(colRef, (snapshot) => {
-        let results = [];
-        snapshot.forEach((doc) => {
-          results.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        setListUsers(results);
-      });
-    }
-    fetchData();
-    document.title = "User Manage";
-  }, []);
   const [users, setUsers] = useState([]);
   useEffect(() => {
     if (filterDebounce) {

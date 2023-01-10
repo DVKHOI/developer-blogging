@@ -3,39 +3,19 @@ import Heading from "../../components/layout/Heading";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import PostFeatureItem, { FeatureItemSkeleton } from "../post/PostFeatureItem";
-import {
-  collection,
-  query,
-  where,
-  onSnapshot,
-  limit,
-} from "firebase/firestore";
-import { database } from "../../firebase/firebase-config";
+import { useSelector } from "react-redux";
 const HomeFeatureStyles = styled.div``;
 const HomeFeature = () => {
   const [posts, setPosts] = useState([]);
+  const listPosts = useSelector((state) => state.postsRedux.posts);
+
   const isLoading = posts.length <= 0;
   useEffect(() => {
     document.title =
       "Developer way: improve your technical skills with in-depth explanations, practical advices and useful tips and tricks.";
-    const colRef = collection(database, "posts");
-    const queris = query(
-      colRef,
-      where("status", "==", 1),
-      where("hot", "==", true),
-      limit(4)
-    );
-    let result = [];
-    onSnapshot(queris, (snapshot) => {
-      snapshot.forEach((doc) => {
-        result.push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-      setPosts(result);
-    });
-  }, []);
+    const results = listPosts.filter((post) => post.hot === true);
+    setPosts(results);
+  }, [listPosts]);
   return (
     <HomeFeatureStyles className="home-block">
       <div className="container">

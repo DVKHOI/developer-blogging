@@ -12,6 +12,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { createRoot } from "react-dom/client";
 import "animate.css";
+import { Provider } from "react-redux";
+import store from "./store/store";
 const container = document.getElementById("root");
 const root = createRoot(container);
 
@@ -19,7 +21,9 @@ root.render(
   <ThemeProvider theme={theme}>
     <GlobalStyles></GlobalStyles>
     <BrowserRouter>
-      <App />
+      <Provider store={store}>
+        <App />
+      </Provider>
       <ToastContainer></ToastContainer>
     </BrowserRouter>
   </ThemeProvider>

@@ -1,48 +1,25 @@
-import {
-  collection,
-  limit,
-  onSnapshot,
-  query,
-  where,
-} from "firebase/firestore";
 import React from "react";
 import { useEffect } from "react";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import Heading from "../../components/layout/Heading";
-import { database } from "../../firebase/firebase-config";
 import PostNewestLarge, { NewwesItemSkeleton } from "../post/PostNewestLarge";
 
 const HomeNewestStyles = styled.div``;
-const POST_PER_PAGE = 6;
 const HomeNewestTypescrip = ({ params = "" }) => {
   const [posts, setPosts] = useState([]);
+  const listPosts = useSelector((state) => state.postsRedux.posts);
   const isLoading = posts.length <= 0;
   useEffect(() => {
     async function fetchData() {
-      const colRef = collection(database, "posts");
-
-      const queriesParams = query(
-        colRef,
-        where("status", "==", 1),
-        where("hot", "==", false),
-        where("category.slug", "==", "typescrip"),
-        limit(POST_PER_PAGE)
+      const results = listPosts.filter(
+        (post) => post.category.slug === "typescrip"
       );
-
-      onSnapshot(queriesParams, (snapshot) => {
-        const results = [];
-        snapshot.forEach((doc) => {
-          results.push({
-            id: doc.id,
-            ...doc.data(),
-          });
-        });
-        setPosts(results);
-      });
+      setPosts(results);
     }
     fetchData();
-  }, [params]);
+  }, [listPosts]);
 
   return (
     <HomeNewestStyles className="home-block">
@@ -50,24 +27,16 @@ const HomeNewestTypescrip = ({ params = "" }) => {
         <Heading>List posts</Heading>
         {isLoading && (
           <div className="row">
-            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
-              <NewwesItemSkeleton></NewwesItemSkeleton>
-            </div>
-            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
-              <NewwesItemSkeleton></NewwesItemSkeleton>
-            </div>
-            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
-              <NewwesItemSkeleton></NewwesItemSkeleton>
-            </div>
-            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
-              <NewwesItemSkeleton></NewwesItemSkeleton>
-            </div>
-            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
-              <NewwesItemSkeleton></NewwesItemSkeleton>
-            </div>
-            <div className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12">
-              <NewwesItemSkeleton></NewwesItemSkeleton>
-            </div>
+            {Array(6)
+              .fill(0)
+              .map((item, index) => (
+                <div
+                  key={index}
+                  className="gap-3 mb-5 col-lg-4 col-md-6 col-sm-12"
+                >
+                  <NewwesItemSkeleton></NewwesItemSkeleton>
+                </div>
+              ))}
           </div>
         )}
         {!isLoading && (
