@@ -56,8 +56,12 @@ const LoginPage = () => {
   }, []);
   const handleLogin = async (values) => {
     if (!isValid) return;
-    await signInWithEmailAndPassword(auth, values.email, values.password);
-    navigate("/");
+    try {
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      navigate("/");
+    } catch (error) {
+      toast.error("User or password error invalid");
+    }
   };
 
   return (
