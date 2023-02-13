@@ -14,10 +14,6 @@ import useDebounce from "../../hooks/useDebounce";
 import { postStatus, userRole } from "../../utils/constants";
 const PostManage = () => {
   const [listPosts, setListPost] = useState([]);
-  console.log(
-    "🚀 ~ file: PostManage.js:18 ~ PostManage ~ listPosts",
-    listPosts
-  );
   const [filter, setFilter] = useState("");
   const navigate = useNavigate();
   const { userInfo } = useAuth();
@@ -40,7 +36,7 @@ const PostManage = () => {
     }
     fetchData();
     document.title = "Post Manage";
-  }, [post, userInfo.email, userInfo.role]);
+  }, [post, userInfo.role]);
 
   const [posts, setPosts] = useState([]);
   useEffect(() => {

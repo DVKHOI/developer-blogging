@@ -12,8 +12,6 @@ import { postStatus, userRole } from "../../utils/constants";
 import {
   addDoc,
   collection,
-  doc,
-  getDoc,
   getDocs,
   query,
   serverTimestamp,
@@ -57,16 +55,7 @@ const PostAddNew = () => {
   const [loading, setLoading] = useState(false);
   const { userInfo } = useAuth();
   const listCategories = useSelector((state) => state.categoryRedux.categories);
-  useEffect(() => {
-    async function getData() {
-      const results = listCategories.filter(
-        (category) => category.status === 1
-      );
 
-      setCategories(results);
-    }
-    getData();
-  }, [listCategories]);
   const watchStatus = watch("status");
   const watchHot = watch("hot");
   useEffect(() => {
@@ -88,6 +77,7 @@ const PostAddNew = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userInfo.email]);
   const addPostHandle = async (values) => {
+    console.log("🚀 ~ file: PostAddNew.js:82 ~ addPostHandle ~ values", values);
     try {
       setLoading(true);
       const cloneValues = { ...values };
@@ -121,15 +111,19 @@ const PostAddNew = () => {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    async function getData() {
+      const results = listCategories.filter(
+        (category) => category.status === 1
+      );
+
+      setCategories(results);
+    }
+    getData();
+  }, [listCategories]);
   const handleSelectCategory = async (item) => {
-    const colRef = doc(database, "categories", item.id);
-    const docData = await getDoc(colRef);
-
-    setValue("category", {
-      id: docData.id,
-      ...docData.data(),
-    });
-
+    const result = categories.filter((category) => category.name === item.name);
+    setValue("category", result[0]);
     setSelectCategory(item);
   };
   useEffect(() => {
